@@ -7,7 +7,11 @@ pub fn sort(x: &mut [u32], up: bool) {
 }
 
 fn sub_sort(x: &mut [u32], up: bool) {
-    unimplemented!();
+    if x.len() <= 1 { return }
+    compare_and_swap(x, up);
+    let mid_point = x.len() / 2;
+    sub_sort(&mut x[..mid_point], up);
+    sub_sort(&mut x[mid_point..], up);
 }
 
 fn compare_and_swap(x: &mut [u32], up: bool) {
