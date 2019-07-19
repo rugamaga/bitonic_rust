@@ -75,6 +75,21 @@ mod tests {
 
     use super::{sort, sort_by};
     use crate::SortOrder::*;
+    use crate::utils::{new_u32_vec, is_sorted_asceding, is_sorted_desceding};
+
+    #[test]
+    fn sort_u32_large() {
+        {
+            let mut x = new_u32_vec(65536);
+            assert_eq!(sort(&mut x, &Asceding), Ok(()));
+            assert!(is_sorted_asceding(&x));
+        }
+        {
+            let mut x = new_u32_vec(65536);
+            assert_eq!(sort(&mut x, &Desceding), Ok(()));
+            assert!(is_sorted_desceding(&x));
+        }
+    }
 
     #[test]
     fn sort_students_by_age_asceding() {
