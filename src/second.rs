@@ -1,8 +1,17 @@
-pub fn sort<T: Ord>(x: &mut [T], up: bool) {
+use super::SortOrder;
+
+pub fn sort<T: Ord>(x: &mut [T], order: &SortOrder) {
+    match *order {
+        SortOrder::Asceding => do_sort(x, true),
+        SortOrder::Desceding => do_sort(x, false),
+    };
+}
+
+fn do_sort<T: Ord>(x: &mut [T], up: bool) {
     if x.len() <= 1 { return }
     let mid_point = x.len() / 2;
-    sort(&mut x[..mid_point], true);
-    sort(&mut x[mid_point..], false);
+    do_sort(&mut x[..mid_point], true);
+    do_sort(&mut x[mid_point..], false);
     sub_sort(x, up);
 }
 
@@ -26,12 +35,13 @@ fn compare_and_swap<T: Ord>(x: &mut [T], up: bool) {
 #[cfg(test)]
 mod tests {
     use super::sort;
+    use crate::SortOrder::*;
 
     #[test]
     fn sort_u32_asceding() {
         let mut x: Vec<u32> = vec![10, 30, 11, 20, 4, 330, 21, 110];
 
-        sort(&mut x, true);
+        sort(&mut x, &Asceding);
         assert_eq!(x, vec![4, 10, 11, 20, 21, 30, 110, 330]);
     }
 
@@ -39,21 +49,21 @@ mod tests {
     fn sort_u32_desceding() {
         let mut x: Vec<u32> = vec![10, 30, 11, 20, 4, 330, 21, 110];
 
-        sort(&mut x, false);
+        sort(&mut x, &Desceding);
         assert_eq!(x, vec![330, 110, 30, 21, 20, 11, 10, 4]);
     }
 
     #[test]
     fn sort_str_asceding() {
         let mut x = vec!["Rust", "is", "fast", "and", "memory-efficient", "with", "no", "GC"];
-        sort(&mut x, true);
+        sort(&mut x, &Asceding);
         assert_eq!(x, vec!["GC", "Rust", "and", "fast", "is", "memory-efficient", "no", "with"]);
     }
 
     #[test]
     fn sort_str_desceding() {
         let mut x = vec!["Rust", "is", "fast", "and", "memory-efficient", "with", "no", "GC"];
-        sort(&mut x, false);
+        sort(&mut x, &Desceding);
         assert_eq!(x, vec!["with", "no", "memory-efficient", "is", "fast", "and", "Rust", "GC"]);
     }
 }
