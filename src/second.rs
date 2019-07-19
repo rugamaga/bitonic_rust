@@ -2,7 +2,10 @@ use super::SortOrder;
 
 pub fn sort<T: Ord>(x: &mut [T], order: &SortOrder) -> Result<(), String> {
     if !x.len().is_power_of_two() {
-        return Err(format!("The length of x is not a power of two. (x.len(): {})", x.len()));
+        return Err(format!(
+            "The length of x is not a power of two. (x.len(): {})",
+            x.len()
+        ));
     }
     match *order {
         SortOrder::Asceding => do_sort(x, true),
@@ -12,7 +15,9 @@ pub fn sort<T: Ord>(x: &mut [T], order: &SortOrder) -> Result<(), String> {
 }
 
 fn do_sort<T: Ord>(x: &mut [T], up: bool) {
-    if x.len() <= 1 { return }
+    if x.len() <= 1 {
+        return;
+    }
     let mid_point = x.len() / 2;
     do_sort(&mut x[..mid_point], true);
     do_sort(&mut x[mid_point..], false);
@@ -20,7 +25,9 @@ fn do_sort<T: Ord>(x: &mut [T], up: bool) {
 }
 
 fn sub_sort<T: Ord>(x: &mut [T], up: bool) {
-    if x.len() <= 1 { return }
+    if x.len() <= 1 {
+        return;
+    }
     compare_and_swap(x, up);
     let mid_point = x.len() / 2;
     sub_sort(&mut x[..mid_point], up);
@@ -29,7 +36,7 @@ fn sub_sort<T: Ord>(x: &mut [T], up: bool) {
 
 fn compare_and_swap<T: Ord>(x: &mut [T], up: bool) {
     let mid_point = x.len() / 2;
-    for i in  0..mid_point {
+    for i in 0..mid_point {
         if (x[i] > x[mid_point + i]) == up {
             x.swap(i, mid_point + i);
         }
@@ -59,15 +66,57 @@ mod tests {
 
     #[test]
     fn sort_str_asceding() {
-        let mut x = vec!["Rust", "is", "fast", "and", "memory-efficient", "with", "no", "GC"];
+        let mut x = vec![
+            "Rust",
+            "is",
+            "fast",
+            "and",
+            "memory-efficient",
+            "with",
+            "no",
+            "GC",
+        ];
         assert_eq!(sort(&mut x, &Asceding), Ok(()));
-        assert_eq!(x, vec!["GC", "Rust", "and", "fast", "is", "memory-efficient", "no", "with"]);
+        assert_eq!(
+            x,
+            vec![
+                "GC",
+                "Rust",
+                "and",
+                "fast",
+                "is",
+                "memory-efficient",
+                "no",
+                "with"
+            ]
+        );
     }
 
     #[test]
     fn sort_str_desceding() {
-        let mut x = vec!["Rust", "is", "fast", "and", "memory-efficient", "with", "no", "GC"];
+        let mut x = vec![
+            "Rust",
+            "is",
+            "fast",
+            "and",
+            "memory-efficient",
+            "with",
+            "no",
+            "GC",
+        ];
         assert_eq!(sort(&mut x, &Desceding), Ok(()));
-        assert_eq!(x, vec!["with", "no", "memory-efficient", "is", "fast", "and", "Rust", "GC"]);
+        assert_eq!(
+            x,
+            vec![
+                "with",
+                "no",
+                "memory-efficient",
+                "is",
+                "fast",
+                "and",
+                "Rust",
+                "GC"
+            ]
+        );
     }
 }

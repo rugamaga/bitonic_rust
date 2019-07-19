@@ -1,13 +1,13 @@
 use num_cpus;
 
-use bitonic::SortOrder;
-use bitonic::third::sort as seq_sort;
 use bitonic::fourth::sort as par_sort;
+use bitonic::third::sort as seq_sort;
 use bitonic::utils::{is_sorted_asceding, new_u32_vec};
+use bitonic::SortOrder;
 
-use std::{env, f64};
 use std::str::FromStr;
 use std::time::Instant;
+use std::{env, f64};
 
 fn main() {
     if let Some(n) = env::args().nth(1) {
@@ -43,8 +43,9 @@ fn run_sorts(bits: u32) {
     println!("speed up: {:.2}x", seq_duration / par_duration);
 }
 
-fn timed_sort<F>(sorter: &F, len: usize, name: &str) -> f64 where
-    F: Fn(&mut [u32], &SortOrder) -> Result<(), String>
+fn timed_sort<F>(sorter: &F, len: usize, name: &str) -> f64
+where
+    F: Fn(&mut [u32], &SortOrder) -> Result<(), String>,
 {
     let mut x = new_u32_vec(len);
 

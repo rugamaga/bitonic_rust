@@ -1,22 +1,25 @@
-use std::cmp::Ordering;
-use rayon;
 use super::SortOrder;
+use rayon;
+use std::cmp::Ordering;
 
 const PARALLEL_THRESHOLD: usize = 4096;
 
 pub fn sort_by<T, F>(x: &mut [T], comparator: &F) -> Result<(), String>
-    where T: Send,
-          F: Sync + Fn(&T, &T) -> Ordering
+where
+    T: Send,
+    F: Sync + Fn(&T, &T) -> Ordering,
 {
     if !x.len().is_power_of_two() {
-        return Err(format!("The length of x is not a power of two. (x.len(): {})", x.len()));
+        return Err(format!(
+            "The length of x is not a power of two. (x.len(): {})",
+            x.len()
+        ));
     }
     do_sort(x, true, comparator);
     Ok(())
 }
 
-pub fn sort<T: Ord + Send>(x: &mut [T], order: &SortOrder) -> Result<(), String>
-{
+pub fn sort<T: Ord + Send>(x: &mut [T], order: &SortOrder) -> Result<(), String> {
     match *order {
         SortOrder::Asceding => sort_by(x, &|a, b| a.cmp(b)),
         SortOrder::Desceding => sort_by(x, &|a, b| b.cmp(a)),
@@ -24,10 +27,13 @@ pub fn sort<T: Ord + Send>(x: &mut [T], order: &SortOrder) -> Result<(), String>
 }
 
 fn do_sort<T, F>(x: &mut [T], forward: bool, comparator: &F)
-    where T: Send,
-          F: Sync + Fn(&T, &T) -> Ordering
+where
+    T: Send,
+    F: Sync + Fn(&T, &T) -> Ordering,
 {
-    if x.len() <= 1 { return }
+    if x.len() <= 1 {
+        return;
+    }
     let mid_point = x.len() / 2;
     let (first, second) = x.split_at_mut(mid_point);
     if mid_point >= PARALLEL_THRESHOLD {
@@ -43,10 +49,13 @@ fn do_sort<T, F>(x: &mut [T], forward: bool, comparator: &F)
 }
 
 fn sub_sort<T, F>(x: &mut [T], forward: bool, comparator: &F)
-    where T: Send,
-          F: Sync + Fn(&T, &T) -> Ordering
+where
+    T: Send,
+    F: Sync + Fn(&T, &T) -> Ordering,
 {
-    if x.len() <= 1 { return }
+    if x.len() <= 1 {
+        return;
+    }
     compare_and_swap(x, forward, comparator);
     let mid_point = x.len() / 2;
     let (first, second) = x.split_at_mut(mid_point);
@@ -62,7 +71,8 @@ fn sub_sort<T, F>(x: &mut [T], forward: bool, comparator: &F)
 }
 
 fn compare_and_swap<T, F>(x: &mut [T], forward: bool, comparator: &F)
-    where F: Fn(&T, &T) -> Ordering
+where
+    F: Fn(&T, &T) -> Ordering,
 {
     let swap_condition = if forward {
         Ordering::Greater
@@ -70,7 +80,7 @@ fn compare_and_swap<T, F>(x: &mut [T], forward: bool, comparator: &F)
         Ordering::Less
     };
     let mid_point = x.len() / 2;
-    for i in  0..mid_point {
+    for i in 0..mid_point {
         if comparator(&x[i], &x[mid_point + i]) == swap_condition {
             x.swap(i, mid_point + i);
         }
@@ -97,8 +107,8 @@ mod tests {
     }
 
     use super::{sort, sort_by};
+    use crate::utils::{is_sorted_asceding, is_sorted_desceding, new_u32_vec};
     use crate::SortOrder::*;
-    use crate::utils::{new_u32_vec, is_sorted_asceding, is_sorted_desceding};
 
     #[test]
     fn sort_u32_large() {
@@ -125,10 +135,7 @@ mod tests {
 
         let expected = vec![&hanako, &kyoko, &taro, &ryosuke];
 
-        assert_eq!(
-            sort_by(&mut x, &|a, b| a.age.cmp(&b.age)),
-            Ok(())
-        );
+        assert_eq!(sort_by(&mut x, &|a, b| a.age.cmp(&b.age)), Ok(()));
 
         assert_eq!(x, expected);
     }
@@ -145,8 +152,10 @@ mod tests {
         let expected = vec![&ryosuke, &kyoko, &hanako, &taro];
 
         assert_eq!(
-            sort_by(&mut x, &|a, b| a.last_name.cmp(&b.last_name)
-                    .then_with(|| a.first_name.cmp(&b.first_name))),
+            sort_by(&mut x, &|a, b| a
+                .last_name
+                .cmp(&b.last_name)
+                .then_with(|| a.first_name.cmp(&b.first_name))),
             Ok(())
         );
 
@@ -171,15 +180,57 @@ mod tests {
 
     #[test]
     fn sort_str_asceding() {
-        let mut x = vec!["Rust", "is", "fast", "and", "memory-efficient", "with", "no", "GC"];
+        let mut x = vec![
+            "Rust",
+            "is",
+            "fast",
+            "and",
+            "memory-efficient",
+            "with",
+            "no",
+            "GC",
+        ];
         assert_eq!(sort(&mut x, &Asceding), Ok(()));
-        assert_eq!(x, vec!["GC", "Rust", "and", "fast", "is", "memory-efficient", "no", "with"]);
+        assert_eq!(
+            x,
+            vec![
+                "GC",
+                "Rust",
+                "and",
+                "fast",
+                "is",
+                "memory-efficient",
+                "no",
+                "with"
+            ]
+        );
     }
 
     #[test]
     fn sort_str_desceding() {
-        let mut x = vec!["Rust", "is", "fast", "and", "memory-efficient", "with", "no", "GC"];
+        let mut x = vec![
+            "Rust",
+            "is",
+            "fast",
+            "and",
+            "memory-efficient",
+            "with",
+            "no",
+            "GC",
+        ];
         assert_eq!(sort(&mut x, &Desceding), Ok(()));
-        assert_eq!(x, vec!["with", "no", "memory-efficient", "is", "fast", "and", "Rust", "GC"]);
+        assert_eq!(
+            x,
+            vec![
+                "with",
+                "no",
+                "memory-efficient",
+                "is",
+                "fast",
+                "and",
+                "Rust",
+                "GC"
+            ]
+        );
     }
 }
